@@ -8,11 +8,18 @@ spring:
   config:
     activate:
       on-profile: dev
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 678566526531-n7dodr50j69dfo6ov17fh0pqck4e1ipr.apps.googleusercontent.com
+            client-secret: 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
   datasource:
-    url: jdbc:mysql://db-mysql-fra1-03778-do-user-13618490-0.c.db.ondigitalocean.com:25060/defaultdb
-    username: doadmin
+    url: jdbc:mysql://db-mysql-fra1-03778-do-user-13618490-0.c.db.ondigitalocean.com:25060/doktordb
+    username: uniquedoctor
     driver-class-name: com.mysql.cj.jdbc.Driver
-    password: AVNS_8bGK9LSxpKNWxac-Vnd
+    password: AVNS_t_81AH4vtSY6cjOfgum
   jpa:
     show-sql: true
     hibernate:
@@ -22,7 +29,7 @@ spring:
 doctor:
   openai:
     baseUrl: "https://api.openai.com/v1/threads"
-    apiKey: "Bearer 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"
+    apiKey: "Bearer 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"
     headerKey: "OpenAI-Beta"
     headerValue: "assistants=v1"
     assistantId: "asst_WyF5mO84qyaM2EXGNqGo2dJT"

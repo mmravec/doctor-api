@@ -3,7 +3,6 @@ package com.bunch.of.ideas.doctorapi.controller;
 import com.bunch.of.ideas.doctorapi.entity.User;
 import com.bunch.of.ideas.doctorapi.repository.UserRepository;
 import com.bunch.of.ideas.doctorapi.service.DoctorService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,11 +14,14 @@ import java.util.Optional;
 @RestController
 public class ChatController {
 
-    @Autowired
-    private DoctorService doctorService;
+    private final DoctorService doctorService;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+
+    public ChatController(DoctorService doctorService, UserRepository userRepository) {
+        this.doctorService = doctorService;
+        this.userRepository = userRepository;
+    }
 
     @PostMapping("/sendMessage")
     public ResponseEntity<?> sendMessage(@RequestBody String message) {

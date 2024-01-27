@@ -14,4 +14,7 @@ public interface MentalHistoryRepository extends JpaRepository<MentalHistory, St
 
     @Query("SELECT mh FROM MentalHistory mh WHERE mh.email = :email AND mh.createDate BETWEEN :startDate AND :endDate ORDER BY mh.createDate")
     List<MentalHistory> findByEmailAndDateRange(@Param("email") String email, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
+    @Query("SELECT COUNT(m) FROM MentalHistory m WHERE m.email = :email AND DATE(m.createDate) = CURRENT_DATE")
+    int countTodayEntriesByEmail(@Param("email") String email);
 }

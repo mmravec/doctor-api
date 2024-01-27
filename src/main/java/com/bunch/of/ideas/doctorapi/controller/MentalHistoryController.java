@@ -29,8 +29,8 @@ public class MentalHistoryController {
 
     @GetMapping("/mentalHistory/monthly/{email}")
     public ResponseEntity<List<MentalHistory>> getMentalHistorymonthlyByEmail(@PathVariable String email) {
-        LocalDateTime endDate = LocalDateTime.now().minusDays(7);
-        LocalDateTime startDate = endDate.minusDays(20);
+        LocalDateTime endDate = LocalDateTime.now();
+        LocalDateTime startDate = endDate.minusDays(30);
         List<MentalHistory> history = mentalHistoryRepository.findByEmailAndDateRange(email, startDate, endDate);
         return ResponseEntity.ok(history);
     }

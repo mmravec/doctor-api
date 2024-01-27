@@ -1,8 +1,3 @@
-
-
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,13 +19,13 @@
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
             <li class="nav-item active">
-                <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                <a class="nav-link" href="/loginSuccess">Home <span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="#">Profile</a>
+                <a class="nav-link" href="/mini-chat">Mini Session</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="/chat">Chat</a>
+                <a class="nav-link" href="/chat">Regular Session</a>
             </li>
         </ul>
     </div>
@@ -50,9 +45,13 @@
 <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const email = [[${email}]];
+    /*]]>*/
+</script>
 <script>
-    const email = 'Martin@doktor.com'; // Replace with the actual email
+    // const email = 'Martin@doktor.com'; // Replace with the actual email
 
     const goptions = {
         scales: {
@@ -104,18 +103,6 @@
 
         chart.update();
     }
-
-    // function fetchAndDisplayData(email) {
-    //     fetch(`http://localhost:8080/mentalHistory/weekly/${email}`)
-    //         .then(response => response.json())
-    //         .then(data => updateChartData(weeklyChart, data))
-    //         .catch(error => console.error('Error fetching weekly data:', error));
-    //
-    //     fetch(`http://localhost:8080/mentalHistory/monthly/${email}`)
-    //         .then(response => response.json())
-    //         .then(data => updateChartData(monthlyChart, data))
-    //         .catch(error => console.error('Error fetching monthly data:', error));
-    // }
 
     function fetchAndDisplayData(email) {
         // Define your start and end dates for weekly and monthly data

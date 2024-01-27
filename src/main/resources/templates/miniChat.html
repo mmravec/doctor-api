@@ -39,6 +39,29 @@
             color: #666;
             font-size: 0.85em;
         }
+        .typing-indicator {
+            display: flex;
+            align-items: center; /* Uistite sa, že bodky sú vertikálne zarovnané v strede */
+            justify-content: center;
+            height: 30px; /* Nastavte výšku kontajnera podľa potreby */
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            margin: 0 3px;
+            background-color: #333; /* Alebo akúkoľvek farbu, ktorú preferujete */
+            border-radius: 50%;
+            animation: bounce 0.5s infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-5px); } /* Znížte hodnotu pre menší skok */
+        }
+
+        .dot:nth-child(2) { animation-delay: 0.1s; }
+        .dot:nth-child(3) { animation-delay: 0.2s; }
     </style>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
 </head>
@@ -58,7 +81,7 @@
                 <a class="nav-link" href="/history">History</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="/mini-chat">Mini Session</a>
+                <a class="nav-link" href="/chat">Regular Session</a>
             </li>
         </ul>
     </div>
@@ -74,7 +97,7 @@
         <!-- Chat messages will be appended here -->
     </div>
     <div class="input-group mb-3">
-        <input type="text" id="messageInput" class="form-control" placeholder="Type a message...">
+        <input type="number" id="messageInput" class="form-control" placeholder="Type a number between 1 and 5">
         <div class="input-group-append">
             <button class="btn btn-primary" type="button" id="sendButton">
                 <i class="fas fa-paper-plane"></i> Send
@@ -96,6 +119,7 @@
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        checkCanSendMessage(email);
         const chatContainer = document.getElementById('chatContainer');
         let lastDisplayedTime = '';
         // Načítanie histórie správ pri načítaní stránky
@@ -120,7 +144,16 @@
                 messageDiv.classList.add('response-message');
             }
 
-            if (!isTyping) {
+            if (isTyping) {
+                const typingDiv = document.createElement('div');
+                typingDiv.classList.add('typing-indicator');
+                for (let i = 0; i < 3; i++) {
+                    const dot = document.createElement('div');
+                    dot.classList.add('dot');
+                    typingDiv.appendChild(dot);
+                }
+                messageDiv.appendChild(typingDiv);
+            } else {
                 messageDiv.textContent = text;
             }
 
@@ -139,10 +172,15 @@
         // Funkcia na odoslanie správy
         function sendUserMessage() {
             const messageText = messageInput.value.trim();
-            if (messageText) {
-                sendMessage(messageText);
-                messageInput.value = ''; // Vyčistenie poľa po odoslaní
+            // Skontrolujte, či je vstup číslo
+            if (!messageText || isNaN(messageText) || parseInt(messageText) < 1 || parseInt(messageText) > 5) {
+                alert("Prosím, zadajte číslo od 1 do 5.");
+                return;
             }
+
+            // Pokračujte v odosielaní správy, ak je vstup platný
+            sendMessage(messageText);
+            messageInput.value = ''; // Vyčistenie poľa po odoslaní
         }
 
         // Poslucháč udalostí pre tlačidlo Send
@@ -170,7 +208,7 @@
             addMessage(text, true); // Pridá správu užívateľa
             const typingMessage = addMessage('', false, true); // Pridá dočasnú správu "Typing..." so spinnerom
 
-            fetch('http://localhost:8080/sendMessage', {
+            fetch('http://localhost:8080/mini-chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'text/plain',
@@ -187,6 +225,8 @@
                     console.error('Error:', error);
                     chatContainer.removeChild(typingMessage); // Odstráni "Typing..." v prípade chyby
                 });
+            // var userEmail = 'john.doe@example.com'; // Replace with dynamic user email
+            checkCanSendMessage(email);
         }
 
         function checkCanSendMessage(userEmail) {
@@ -204,7 +244,6 @@
                 },
                 error: function(error) {
                     console.error('Error checking message permission:', error);
-                    // Handle error appropriately
                 }
             });
         }
