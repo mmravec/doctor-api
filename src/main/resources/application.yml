@@ -1,0 +1,32 @@
+spring:
+  profiles:
+    active:
+      - dev
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    url: jdbc:mysql://db-mysql-fra1-03778-do-user-13618490-0.c.db.ondigitalocean.com:25060/defaultdb
+    username: doadmin
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    password: AVNS_8bGK9LSxpKNWxac-Vnd
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+doctor:
+  openai:
+    baseUrl: "https://api.openai.com/v1/threads"
+    apiKey: "Bearer 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"
+    headerKey: "OpenAI-Beta"
+    headerValue: "assistants=v1"
+    assistantId: "asst_WyF5mO84qyaM2EXGNqGo2dJT"
+    localUrl: "http://localhost:8080"
+logging:
+  level:
+    root: info

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Application</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 400px;
+            overflow-y: auto;
+        }
+        .chat-message {
+            margin: 5px;
+            padding: 10px;
+            border-radius: 10px;
+            max-width: 80%;
+        }
+        .user-message {
+            background-color: #007bff; /* Modrá farba */
+            color: white;
+            align-self: flex-end;
+        }
+        .response-message {
+            background-color: #f1f1f1; /* Šedá farba */
+            align-self: flex-start;
+        }
+        .navbar {
+            margin-bottom: 20px;
+        }
+        .time-stamp {
+            text-align: center;
+            margin: 10px 0;
+            color: #666;
+            font-size: 0.85em;
+        }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">ChatApp</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item active">
+                <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Profile</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/history">History</a>
+            </li>
+        </ul>
+    </div>
+    <div class="navbar-nav ml-auto">
+        <img src="path_to_avatar.jpg" alt="User Avatar" style="height: 50px; border-radius: 50%;">
+    </div>
+</nav>
+
+<!-- Chat Container -->
+<div class="container">
+    <h3>Som tvoj doktor</h3>
+    <div class="chat-container" id="chatContainer">
+        <!-- Chat messages will be appended here -->
+    </div>
+    <div class="input-group mb-3">
+        <input type="text" id="messageInput" class="form-control" placeholder="Type a message...">
+        <div class="input-group-append">
+            <button class="btn btn-primary" type="button" id="sendButton">
+                <i class="fas fa-paper-plane"></i> Send
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS, Popper.js, and jQuery -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatContainer = document.getElementById('chatContainer');
+        let lastDisplayedTime = '';
+        // Načítanie histórie správ pri načítaní stránky
+        // loadChatHistory();
+
+        function addMessage(text, isUser, isTyping = false) {
+            const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            if (lastDisplayedTime !== currentTime) {
+                const timeDiv = document.createElement('div');
+                timeDiv.classList.add('time-stamp');
+                timeDiv.textContent = currentTime;
+                chatContainer.appendChild(timeDiv);
+                lastDisplayedTime = currentTime;
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('chat-message');
+            if (isUser) {
+                messageDiv.classList.add('user-message');
+            } else {
+                messageDiv.classList.add('response-message');
+            }
+
+            if (!isTyping) {
+                messageDiv.textContent = text;
+            }
+
+            chatContainer.appendChild(messageDiv);
+            scrollToBottom();
+            return messageDiv;
+        }
+
+        function scrollToBottom() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+
+        // Funkcia na odoslanie správy
+        function sendUserMessage() {
+            const messageText = messageInput.value.trim();
+            if (messageText) {
+                sendMessage(messageText);
+                messageInput.value = ''; // Vyčistenie poľa po odoslaní
+            }
+        }
+
+        // Poslucháč udalostí pre tlačidlo Send
+        sendButton.addEventListener('click', sendUserMessage);
+
+        // Poslucháč udalostí pre stlačenie klávesy Enter
+        messageInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Zabráni predvolenému správaniu klávesy Enter (nový riadok)
+                sendUserMessage();
+            }
+        });
+
+        sendButton.addEventListener('click', function() {
+            const messageText = messageInput.value.trim();
+            if (messageText) {
+                sendMessage(messageText);
+                messageInput.value = ''; // Clear input field after sending
+            }
+        });
+
+        function sendMessage(text) {
+            addMessage(text, true); // Pridá správu užívateľa
+            const typingMessage = addMessage('', false, true); // Pridá dočasnú správu "Typing..." so spinnerom
+
+            fetch('http://localhost:8080/sendMessage', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain'
+                },
+                body: text
+            })
+                .then(response => response.text())
+                .then(data => {
+                    chatContainer.removeChild(typingMessage); // Odstráni "Typing..."
+                    addMessage(data, false); // Zobrazí odpoveď z backendu
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    chatContainer.removeChild(typingMessage); // Odstráni "Typing..." v prípade chyby
+                });
+            var userEmail = 'john.doe@example.com'; // Replace with dynamic user email
+            checkCanSendMessage(userEmail);
+        }
+
+        function checkCanSendMessage(userEmail) {
+            $.ajax({
+                url: '/canSendMessage/' + userEmail,
+                type: 'GET',
+                success: function(canSend) {
+                    if (canSend) {
+                        $("#messageInput").prop('disabled', false);
+                        $("#sendButton").prop('disabled', false);
+                    } else {
+                        $("#messageInput").prop('disabled', true);
+                        $("#sendButton").prop('disabled', true);
+                    }
+                },
+                error: function(error) {
+                    console.error('Error checking message permission:', error);
+                    // Handle error appropriately
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health History</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<!-- Navigation Bar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">ChatApp</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+            <li class="nav-item active">
+                <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Profile</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/chat">Chat</a>
+            </li>
+        </ul>
+    </div>
+    <div class="navbar-nav ml-auto">
+        <img src="path_to_avatar.jpg" alt="User Avatar" style="height: 50px; border-radius: 50%;">
+    </div>
+</nav>
+<div class="container mt-4">
+    <h2>Posledných 7 Dní</h2>
+    <canvas id="weeklyChart"></canvas>
+
+    <h2>Posledných 30 Dní</h2>
+    <canvas id="monthlyChart"></canvas>
+</div>
+
+<!-- Bootstrap JS, Popper.js, and jQuery -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<script>
+    const email = 'Martin@doktor.com'; // Replace with the actual email
+
+    const goptions = {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    };
+
+    const weeklyChart = new Chart(document.getElementById('weeklyChart'), {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Mentálne zdravie',
+                data: [],
+                borderColor: 'blue',
+                fill: false
+            }]
+        },
+        options: goptions
+    });
+
+    const monthlyChart = new Chart(document.getElementById('monthlyChart'), {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Mentálne zdravie',
+                data: [],
+                borderColor: 'green',
+                fill: false
+            }]
+        },
+        options: goptions
+    });
+
+    function updateChartData(chart, chartData) {
+        const labels = chartData.map((_, index) => {
+            const date = new Date();
+            date.setDate(date.getDate() - (chartData.length - 1 - index));
+            return date.toISOString().split('T')[0];
+        });
+
+        chart.data.labels = labels;
+        chart.data.datasets.forEach(dataset => {
+            dataset.data = chartData;
+        });
+
+        chart.update();
+    }
+
+    // function fetchAndDisplayData(email) {
+    //     fetch(`http://localhost:8080/mentalHistory/weekly/${email}`)
+    //         .then(response => response.json())
+    //         .then(data => updateChartData(weeklyChart, data))
+    //         .catch(error => console.error('Error fetching weekly data:', error));
+    //
+    //     fetch(`http://localhost:8080/mentalHistory/monthly/${email}`)
+    //         .then(response => response.json())
+    //         .then(data => updateChartData(monthlyChart, data))
+    //         .catch(error => console.error('Error fetching monthly data:', error));
+    // }
+
+    function fetchAndDisplayData(email) {
+        // Define your start and end dates for weekly and monthly data
+        const endDate = new Date();
+        let startDate = new Date();
+        startDate.setDate(endDate.getDate() - 7); // For weekly data
+
+        fetch(`/mentalHistory/weekly/${email}`)
+            .then(response => response.json())
+            .then(rawData => {
+                const startDate = new Date();
+                startDate.setDate(startDate.getDate() - 7); // Adjust for weekly data
+                const endDate = new Date();
+
+                const chartData = prepareChartData(rawData, startDate, endDate);
+                console.log("Processed chart data:", chartData); // Log the processed data
+
+                updateChartData(weeklyChart, chartData);
+            })
+            .catch(error => console.error('Error fetching weekly data:', error));
+
+        // Similar for monthly data, adjust the date range accordingly
+        fetch(`/mentalHistory/monthly/${email}`)
+            .then(response => response.json())
+            .then(rawData => {
+                console.log("Received monthly data:", rawData);
+                let startDate = new Date();
+                startDate.setDate(startDate.getDate() - 30); // Adjust for monthly data
+                const endDate = new Date();
+
+                // When calling fetchAndDisplayData for the monthly chart
+                const monthlyChartData = prepareChartData(rawData, startDate, endDate);
+                console.log("Processed monthly chart data:", monthlyChartData); // Log the processed data
+                updateChartData(monthlyChart, monthlyChartData);
+            })
+            .catch(error => console.error('Error fetching monthly data:', error));
+    }
+
+
+    function prepareChartData(rawData, startDate, endDate) {
+        const dateRange = getDatesInRange(startDate, endDate).map(date =>
+            date.toISOString().split('T')[0]
+        );
+
+        const dataMap = new Map(
+            rawData.map(item => [
+                item.createDate.split('T')[0], // Assuming createDate is in ISO format
+                item.score
+            ])
+        );
+
+        return dateRange.map(dateStr => dataMap.get(dateStr) || null);
+    }
+
+    function getDatesInRange(startDate, endDate) {
+        const date = new Date(startDate.getTime());
+        const dates = [];
+
+        while (date <= endDate) {
+            dates.push(new Date(date));
+            date.setDate(date.getDate() + 1);
+        }
+
+        return dates;
+    }
+
+    fetchAndDisplayData(email);
+</script>
+</body>
+</html>
