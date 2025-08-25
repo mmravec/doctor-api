@@ -24,7 +24,6 @@ public class DoctorService {
     public DoctorService(LLMRequester llmRequester, DoctorConfig doctorConfig) {
         this.llmRequester = llmRequester;
         this.doctorConfig = doctorConfig;
-        this.gson = new Gson();
     }
 
     public String registerThread(){
@@ -73,7 +72,7 @@ public class DoctorService {
             Future<String> futureResponse = llmRequester.post(url, this.gson.toJson(body));
             String threadStr = futureResponse.get();
             return this.gson.fromJson(threadStr, RunEntity.class);
-        } catch (IOException | ExecutionException | InterruptedException e) {
+        } catch (IOException | ExecutionException) {
             throw new RuntimeException(e);
         }
     }
@@ -95,7 +94,7 @@ public class DoctorService {
         if ( data != null) {
             for (Message message : data) {
                 if (message.getContent() != null) {
-                    for (Content content : message.getContent()) {
+                    for (Content content : message.getUserId()) {
                         if (content.getText() != null) {
                             textValues.add(content.getText().getValue());
                         }
