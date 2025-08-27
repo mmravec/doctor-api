@@ -20,9 +20,9 @@ public class LLMRequester {
     public LLMRequester(DoctorConfig doctorConfig) {
         this.doctorConfig = doctorConfig;
         this.client = new OkHttpClient.Builder()
-                .connectTimeout(60, TimeUnit.SECONDS)
-                .readTimeout(60, TimeUnit.SECONDS)
-                .callTimeout(60, TimeUnit.SECONDS)
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
+                .callTimeout(10, TimeUnit.SECONDS)
                 .build();
     }
 
