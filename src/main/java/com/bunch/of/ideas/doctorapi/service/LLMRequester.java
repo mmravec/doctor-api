@@ -20,9 +20,9 @@ public class LLMRequester {
     public LLMRequester(DoctorConfig doctorConfig) {
         this.doctorConfig = doctorConfig;
         this.client = new OkHttpClient.Builder()
-                .connectTimeout(60, TimeUnit.SECONDS)
-                .readTimeout(60, TimeUnit.SECONDS)
-                .callTimeout(60, TimeUnit.SECONDS)
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS)
+                .callTimeout(10, TimeUnit.SECONDS)
                 .build();
     }
 
@@ -31,7 +31,7 @@ public class LLMRequester {
             Request request = new Request.Builder()
                     .url(url)
                     .get()
-                    .addHeader("Accept", "application/json")
+                    .addHeader("Accept", "zip")
                     .addHeader("Authorization", this.doctorConfig.getApiKey())
                     .addHeader(this.doctorConfig.getHeaderKey(), this.doctorConfig.getHeaderValue())
                     .build();
