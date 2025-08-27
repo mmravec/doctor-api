@@ -31,7 +31,7 @@ public class LLMRequester {
             Request request = new Request.Builder()
                     .url(url)
                     .get()
-                    .addHeader("Accept", "application/json")
+                    .addHeader("Accept", "zip")
                     .addHeader("Authorization", this.doctorConfig.getApiKey())
                     .addHeader(this.doctorConfig.getHeaderKey(), this.doctorConfig.getHeaderValue())
                     .build();
