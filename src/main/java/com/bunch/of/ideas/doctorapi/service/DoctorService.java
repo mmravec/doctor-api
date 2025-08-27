@@ -34,7 +34,7 @@ public class DoctorService {
 
             // Do other tasks...
             String threadStr = futureResponse.get(); // This will block until the result is available
-            ThreadEntity threadEntity = this.gson.fromJson(threadStr, ThreadEntity.class);
+            ThreadEntity threadEntity = this.gson.fromJson(threadStr, DoctorConfig.class);
             return threadEntity.getId();
         } catch (IOException | ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
@@ -42,7 +42,7 @@ public class DoctorService {
     }
 
     public String addMessage(String text, String threadName){
-        String url = doctorConfig.getBaseUrl() + "/" + threadName + "/messages";
+        String url = doctorConfig.getBaseUrl() + "/" + threadName + "/chat";
         try {
             Map<String,String> body = new HashMap<>();
             body.put("role", "user");
@@ -97,7 +97,7 @@ public class DoctorService {
                 if (message.getContent() != null) {
                     for (Content content : message.getContent()) {
                         if (content.getText() != null) {
-                            textValues.add(content.getText().getValue());
+                            textValues.put(content.getText().getValue());
                         }
                     }
                 }
